@@ -5,14 +5,16 @@ orbs:
   eb: circleci/aws-elastic-beanstalk@2.0.1
   aws-cli: circleci/aws-cli@3.1.1
 jobs:
-  build:
+  deploy:
     docker:
       # the base image can run most needed actions with orbs
       - image: "cimg/node:14.15"
     steps:
-      # install node and checkout code
-      - node/install         
+      # install node and checkout code and setup needed for aws, node, elastic beanstalk
+      - node/install
       - checkout
+      - eb/setup
+      - aws-cli/setup
       # Use root level package.json to install dependencies in the frontend app
       - run:
           name: Checking Versions
@@ -42,25 +44,15 @@ jobs:
           name: API Build
           command: |
             npm run api:build
-  # deploy step will run only after manual approval
-  deploy:
-    docker:
-      - image: "cimg/base:stable"
-      # more setup needed for aws, node, elastic beanstalk
-    steps:
-      - node/install
-      - checkout
-      - eb/setup
-      - aws-cli/setup
+      # TODO: Deploy the backend API & frontend      
       - run:
           name: Deploy App
           command: |
-            npm run deploy
-            
+            npm run deploy            
 workflows:
   udagram:
     jobs:
-      - build
+      - deploy
       - hold:
           filters:
             branches:
@@ -68,7 +60,4 @@ workflows:
                 - master
           type: approval
           requires:
-            - build
-      - deploy:
-          requires:
-            - hold
+            - deploy

@@ -3,7 +3,7 @@ branch-defaults:
     environment: udagram-api-dev
     group_suffix: null
 deploy:
-  artifcat: www/Archive.zip
+  artifcat: udagram/udagram-api/www/Archive.zip
 global:
   application_name: udagram-api
   branch: null

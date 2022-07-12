@@ -13,8 +13,6 @@ jobs:
       # install node and checkout code and setup needed for aws, node, elastic beanstalk
       - node/install
       - checkout
-      - eb/setup
-      - aws-cli/setup
       # Use root level package.json to install dependencies in the frontend app
       - run:
           name: Checking Versions
@@ -43,21 +41,24 @@ jobs:
       - run:
           name: API Build
           command: |
-            npm run api:build
-      # TODO: Deploy the backend API & frontend      
+            npm run api:build      
+  # deploy step will run only after manual approval
+  deploy:
+    docker:
+      - image: "cimg/base:stable"
+      # more setup needed for aws, node, elastic beanstalk
+    steps:
+      - node/install
+      - checkout
+      - eb/setup
+      - aws-cli/setup
       - run:
           name: Deploy App
           command: |
-            npm run deploy            
+            npm run deploy
+            
 workflows:
   udagram:
     jobs:
+      - build
       - deploy
-      - hold:
-          filters:
-            branches:
-              only:
-                - master
-          type: approval
-          requires:
-            - deploy
